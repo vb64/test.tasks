@@ -1,0 +1,70 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "let's start the party!"
+msgstr "давайте повеселимся!"
+
+msgid "now playing: %s (%s)"
+msgstr "сейчас играет: %s (%s)"
+
+msgid "party's over"
+msgstr "вечеринка окончена"
+
+msgid "legs"
+msgstr "ноги"
+
+msgid "hands"
+msgstr "руки"
+
+msgid "head"
+msgstr "голова"
+
+msgid "body"
+msgstr "тело"
+
+msgid "half crouch"
+msgstr "в полуприседе"
+
+msgid "in rhythm"
+msgstr "в ритме"
+
+msgid "smooth move"
+msgstr "плавные движения"
+
+msgid "back and forth"
+msgstr "вперед-назад"
+
+msgid "bent at the elbows"
+msgstr "согнуты в локтях"
+
+msgid "circular movements"
+msgstr "круговые движения"
+
+msgid "fixed"
+msgstr "неподвижно"
+
+msgid "shakes kokoshnik"
+msgstr "трясет кокошником"
+
+msgid "drinking vodka"
+msgstr "пьет водку"
+
+msgid "writing code"
+msgstr "пишет код"
+
+msgid "electrodance"
+msgstr "электродэнс"
+
+msgid "hip-hop"
+msgstr "хип-хоп"
+
+msgid "pop"
+msgstr "поп"
+
+msgid "future"
+msgstr "будущее"
