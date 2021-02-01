@@ -3,8 +3,12 @@ IO for zip/xml/csv files
 """
 import threading
 import random
-from Queue import Queue
 from zipfile import ZipFile
+
+try:
+    from queue import Queue
+except ImportError:
+    from Queue import Queue  # Python2
 
 LOG = {}
 
@@ -66,7 +70,7 @@ def main():
     queue_zip = Queue()
     for i in range(ZIP_FILES):  # fill zip file names for writing
         queue_zip.put(i)
-    
+
     for i in range(ZIP_THREADS):  # fill terminator marks for working threads
         queue_zip.put(None)
     for i in range(ZIP_THREADS):  # run zip writers
@@ -76,10 +80,10 @@ def main():
 
     zips = 0
     for i in sorted(LOG.keys()):
-        print "{}: {}".format(i, LOG[i])
+        print("{}: {}".format(i, LOG[i]))
         zips += LOG[i]
 
-    print "Total:", zips
+    print("Total: {}".format(zips))
 
 
 if __name__ == '__main__':
