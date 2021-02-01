@@ -24,10 +24,9 @@ def make_zip(input_queue, thread_id):
         if task_id is None:
             break
 
-        zfile = ZipFile("{}.zip".format(task_id), 'w')
-        for i in range(XML_IN_ZIP):
-            zfile.writestr("{}.xml".format(i), XML_TEMPLATE)
-        zfile.close()
+        with ZipFile("{}.zip".format(task_id), 'w') as zfile:
+            for i in range(XML_IN_ZIP):
+                zfile.writestr("{}.xml".format(i), XML_TEMPLATE)
 
         count += 1
         input_queue.task_done()
