@@ -4,6 +4,7 @@ from threading import Thread
 from random import randint
 from zipfile import ZipFile
 from xml.sax import ContentHandler, parseString
+from csv import writer
 
 try:
     from queue import Queue
@@ -92,6 +93,21 @@ def handle_zip(mode, input_queue, thread_id, csv1, csv2):
     input_queue.task_done()
 
 
+def make_csv(file_name, queue_csv):
+    """Get data from queue and put to csv file."""
+    fhandle = open(file_name, 'w')
+    output = writer(fhandle)
+    while True:
+        row = queue_csv.get()
+        if row is None:
+            break
+        output.writerow(row)
+        queue_csv.task_done()
+
+    queue_csv.task_done()
+    fhandle.close()
+
+
 def init_zip_queue(queue_zip):
     """Fill zip file names and terminator marks for for working threads."""
     for i in range(ZIP_FILES):
@@ -124,10 +140,16 @@ def main():
 
     for i in range(ZIP_THREADS):
         Thread(target=handle_zip, args=('r', queue_zip, i, queue_csv1, queue_csv2)).start()
-    queue_zip.join()
 
-    print("Csv1: {}".format(queue_csv1.qsize()))
-    print("Csv2: {}".format(queue_csv2.qsize()))
+    Thread(target=make_csv, args=('1.csv', queue_csv1)).start()
+    Thread(target=make_csv, args=('2.csv', queue_csv2)).start()
+
+    queue_zip.join()  # wait for all zips handled
+
+    queue_csv1.put(None)
+    queue_csv2.put(None)
+    queue_csv1.join()
+    queue_csv2.join()
 
 
 if __name__ == '__main__':
