@@ -105,7 +105,7 @@ def make_csv(file_name, queue_csv):
 
 
 def init_zip_queue(queue_zip):
-    """Fill zip file names and terminator marks for for working threads."""
+    """Fill zip file names and terminator marks for working threads."""
     for i in range(ZIP_FILES):
         queue_zip.put(i)
     for _ in range(ZIP_THREADS):
