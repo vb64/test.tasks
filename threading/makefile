@@ -9,7 +9,7 @@ endif
 SOURCE = source
 PIP = $(PYTHON) -m pip install
 
-all:
+all: flake8 lint
 	$(PYTHON) $(SOURCE)/main.py
 
 flake8:

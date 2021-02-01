@@ -1,8 +1,7 @@
-"""
-IO for zip/xml/csv files
-"""
-import threading
-import random
+"""Ngenix test task."""
+
+from threading import Thread
+from random import randint
 from zipfile import ZipFile
 
 try:
@@ -35,13 +34,13 @@ XML_TEMPLATE = """<root>
 def make_xml(zip_id, xml_num):
     """Create xml content according rules."""
     xml_id = "Z{}X{}".format(zip_id, xml_num)
-    obj_range = range(random.randint(XML_OBJECTS_MIN, XML_OBJECTS_MAX))
 
     return XML_TEMPLATE.format(
       xml_id,
-      random.randint(XML_LEVEL_MIN, XML_LEVEL_MAX),
+      randint(XML_LEVEL_MIN, XML_LEVEL_MAX),
       '\n'.join([
-        XML_OBJECT_TEMPLATE.format("{}OBJ{}".format(xml_id, i)) for i in obj_range
+        XML_OBJECT_TEMPLATE.format("{}OBJ{}".format(xml_id, i))
+        for i in range(randint(XML_OBJECTS_MIN, XML_OBJECTS_MAX))
       ])
     )
 
@@ -74,7 +73,7 @@ def main():
     for i in range(ZIP_THREADS):  # fill terminator marks for working threads
         queue_zip.put(None)
     for i in range(ZIP_THREADS):  # run zip writers
-        threading.Thread(target=make_zip, args=(queue_zip, i)).start()
+        Thread(target=make_zip, args=(queue_zip, i)).start()
 
     queue_zip.join()
 
