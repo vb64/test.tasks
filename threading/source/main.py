@@ -11,10 +11,9 @@ try:
 except ImportError:
     from Queue import Queue  # Python2
 
-LOG = {}
+ZIP_THREADS = 10
 
 ZIP_FILES = 50
-ZIP_THREADS = 10
 XML_IN_ZIP = 100
 
 XML_LEVEL_MIN = 1
@@ -68,9 +67,8 @@ class NgenixXml(ContentHandler):
             self.csv2.put((self.var_id, attrs.getValue('name')))
 
 
-def handle_zip(mode, input_queue, thread_id, csv1, csv2):
+def handle_zip(mode, input_queue, csv1, csv2):
     """Get zip file names from input_queue and handle according mode."""
-    count = 0
     while True:
         task_id = input_queue.get()
         if task_id is None:
@@ -86,10 +84,8 @@ def handle_zip(mode, input_queue, thread_id, csv1, csv2):
                     parser.var_id = None
                     parseString(zfile.read("{}.xml".format(i)), parser)
 
-        count += 1
         input_queue.task_done()
 
-    LOG[thread_id] = count
     input_queue.task_done()
 
 
@@ -112,34 +108,28 @@ def init_zip_queue(queue_zip):
     """Fill zip file names and terminator marks for for working threads."""
     for i in range(ZIP_FILES):
         queue_zip.put(i)
-    for i in range(ZIP_THREADS):
+    for _ in range(ZIP_THREADS):
         queue_zip.put(None)
 
 
 def main():
     """Write zips, read zips/xml, write csv."""
     queue_zip = Queue()
+
+    print("Step 1: Create zip files.")
     init_zip_queue(queue_zip)
 
-    for i in range(ZIP_THREADS):
-        Thread(target=handle_zip, args=('w', queue_zip, i, None, None)).start()
+    for _ in range(ZIP_THREADS):
+        Thread(target=handle_zip, args=('w', queue_zip, None, None)).start()
     queue_zip.join()
 
-    zips = 0
-    for i in sorted(LOG.keys()):
-        print("{}: {}".format(i, LOG[i]))
-        zips += LOG[i]
-
-    print("Zips created: {}".format(zips))
-
+    print("Step 2: Create csv files.")
+    init_zip_queue(queue_zip)
     queue_csv1 = Queue()
     queue_csv2 = Queue()
-    init_zip_queue(queue_zip)
 
-    LOG.clear()
-
-    for i in range(ZIP_THREADS):
-        Thread(target=handle_zip, args=('r', queue_zip, i, queue_csv1, queue_csv2)).start()
+    for _ in range(ZIP_THREADS):
+        Thread(target=handle_zip, args=('r', queue_zip, queue_csv1, queue_csv2)).start()
 
     Thread(target=make_csv, args=('1.csv', queue_csv1)).start()
     Thread(target=make_csv, args=('2.csv', queue_csv2)).start()
