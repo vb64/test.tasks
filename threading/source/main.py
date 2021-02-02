@@ -1,4 +1,6 @@
-"""Ngenix test task."""
+"""Ngenix test task.
+(C) 2021 by Vitaly Bogomolov mail@vitaly-bogomolov.ru
+"""
 
 from threading import Thread
 from random import randint
@@ -50,6 +52,7 @@ class NgenixXml(ContentHandler):
     """Ngenix xml sax parser."""
 
     def __init__(self, csv1, csv2):
+        """Args csv1 and csv2 are the queues for csv rows."""
         ContentHandler.__init__(self)
         self.var_id = None
         self.csv1 = csv1
@@ -68,7 +71,9 @@ class NgenixXml(ContentHandler):
 
 
 def handle_zip(mode, input_queue, csv1, csv2):
-    """Get zip file names from input_queue and handle according mode."""
+    """Get zip file names from input_queue and handle according mode.
+    mode must be 'w' or 'r'.
+    """
     while True:
         task_id = input_queue.get()
         if task_id is None:
