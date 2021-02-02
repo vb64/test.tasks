@@ -70,28 +70,28 @@ class NgenixXml(ContentHandler):
             self.csv2.put((self.var_id, attrs.getValue('name')))
 
 
-def handle_zip(mode, input_queue, csv1, csv2):
-    """Get zip file names from input_queue and handle according mode.
+def handle_zip(mode, zip_names, csv1, csv2):
+    """Get zip file names and handle according mode.
     mode must be 'w' or 'r'.
     """
     while True:
-        task_id = input_queue.get()
-        if task_id is None:
+        zip_id = zip_names.get()
+        if zip_id is None:
             break
 
-        with ZipFile("{}.zip".format(task_id), mode) as zfile:
+        with ZipFile("{}.zip".format(zip_id), mode) as zfile:
             if mode == 'w':
                 for i in range(XML_IN_ZIP):
-                    zfile.writestr("{}.xml".format(i), make_xml(task_id, i))
+                    zfile.writestr("{}.xml".format(i), make_xml(zip_id, i))
             else:
                 parser = NgenixXml(csv1, csv2)
                 for i in range(XML_IN_ZIP):
                     parser.var_id = None
                     parseString(zfile.read("{}.xml".format(i)), parser)
 
-        input_queue.task_done()
+        zip_names.task_done()
 
-    input_queue.task_done()
+    zip_names.task_done()
 
 
 def make_csv(file_name, queue_csv):
@@ -109,42 +109,42 @@ def make_csv(file_name, queue_csv):
     fhandle.close()
 
 
-def init_zip_queue(queue_zip):
+def init_zip_queue(zip_names):
     """Fill zip file names and terminator marks for working threads."""
     for i in range(ZIP_FILES):
-        queue_zip.put(i)
+        zip_names.put(i)
     for _ in range(ZIP_THREADS):
-        queue_zip.put(None)
+        zip_names.put(None)
 
 
 def main():
     """Write zips, read zips/xml, write csv."""
-    queue_zip = Queue()
+    zip_names = Queue()
 
     print("Step 1: Create zip files.")
-    init_zip_queue(queue_zip)
+    init_zip_queue(zip_names)
 
     for _ in range(ZIP_THREADS):
-        Thread(target=handle_zip, args=('w', queue_zip, None, None)).start()
-    queue_zip.join()
+        Thread(target=handle_zip, args=('w', zip_names, None, None)).start()
+    zip_names.join()
 
     print("Step 2: Create csv files.")
-    init_zip_queue(queue_zip)
-    queue_csv1 = Queue()
-    queue_csv2 = Queue()
+    init_zip_queue(zip_names)
+    csv1 = Queue()
+    csv2 = Queue()
 
     for _ in range(ZIP_THREADS):
-        Thread(target=handle_zip, args=('r', queue_zip, queue_csv1, queue_csv2)).start()
+        Thread(target=handle_zip, args=('r', zip_names, csv1, csv2)).start()
 
-    Thread(target=make_csv, args=('1.csv', queue_csv1)).start()
-    Thread(target=make_csv, args=('2.csv', queue_csv2)).start()
+    Thread(target=make_csv, args=('1.csv', csv1)).start()
+    Thread(target=make_csv, args=('2.csv', csv2)).start()
 
-    queue_zip.join()  # wait for all zips handled
+    zip_names.join()  # wait for all zips handled
 
-    queue_csv1.put(None)
-    queue_csv2.put(None)
-    queue_csv1.join()
-    queue_csv2.join()
+    csv1.put(None)
+    csv2.put(None)
+    csv1.join()
+    csv2.join()
 
 
 if __name__ == '__main__':
